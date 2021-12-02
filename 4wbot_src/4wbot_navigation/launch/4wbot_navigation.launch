@@ -1,0 +1,33 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="map_file" default="$(find 4wbot_navigation)/maps/map_2.yaml"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="move_forward_only" default="false"/>
+  
+
+  <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- AMCL -->
+  <include file="$(find 4wbot_navigation)/launch/amcl.launch"/>
+
+  <!-- move_base -->
+  <include file="$(find 4wbot_navigation)/launch/move_base.launch">
+    <arg name="model" value="waffle" />
+    <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+  </include>
+
+  <!-- rviz -->
+  <group if="$(arg open_rviz)">  
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find 4wbot_navigation)/rviz/4wbot_navigation.rviz"/>
+          <arg default="true" name="gui"/>
+          <param command="$(find xacro)/xacro $(find 4wbot_description)/urdf/4wbot.xacro" name="robot_description"/>
+          <param name="use_gui" value="$(arg gui)"/>
+          <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
+          <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+          <param name="publish_frequency" value="8" />
+          </node>
+  </group>
+
+</launch>
